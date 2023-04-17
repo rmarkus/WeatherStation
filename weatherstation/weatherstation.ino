@@ -152,21 +152,22 @@ void mqttDisconnect() {
 }
 
 
-//
+
 void setup() {
-  // prepare the serial line for debugging
   // connect the LED
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW);
   blink();
-  // setup the sensor for the rowing
+  // setup the sensor for the rain detector
   pinMode(sensorPin, INPUT_PULLUP);
-  //
+  
 
 
   // now initialize the BME280
   Wire.begin();
 
+  // TBD: this is still not nice. If for some reason we cannot 
+  // get the BME sensor, we might want to do something else then looping forever.
   while(!bme.begin())
   {
     delay(1000);
@@ -175,31 +176,33 @@ void setup() {
 
 
   // now read out the sensors
-    // now read out the sensors
   readVoltage();
   readBMEData(); 
 
   delay(100); 
-  digitalWrite(ledPin, HIGH);
+
+  // connect to Wifi and send everything to the server
   int cnt = 0;  
   while ( status != WL_CONNECTED and cnt <10) {
     cnt++;
     WiFi.begin(SSID, PSK);
     status =  WiFi.waitForConnectResult();
-  //  // wait 10 seconds for connection:
+    // wait 10 seconds if not yet connected.
     if (status != WL_CONNECTED) {
      delay(10000);  
     }
   }
   blink();
-  digitalWrite(ledPin, HIGH);
   
-  mqttConnect();
-  mqttSend();
-  mqttDisconnect();
-  WiFi.disconnect();
+  // we only send if we have WLAN
+  // otherwise we just go to sleep again and wait for better times. 
+  if (status == WL_CONNECTED) {
+    mqttConnect();
+    mqttSend();
+    mqttDisconnect();
+    WiFi.disconnect();
+  }
 
-  digitalWrite(ledPin, LOW);
   // goto sleep
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
   esp_deep_sleep_start();
@@ -211,8 +214,7 @@ void setup() {
 
 // main loop
 void loop() {
-
-     
+//   nothing to be done here - everything takes place in setup()     
 
 }
 
