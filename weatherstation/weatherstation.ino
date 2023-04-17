@@ -135,8 +135,6 @@ void mqttConnect(){
 }
 
 void mqttSend() {
-  client.loop();
-  delay(100);
   client.publish("wetter/temperatur2", String(temp,1));
   delay(100);
   client.publish("wetter/luftfeucht2", String(hum,1));
@@ -145,6 +143,7 @@ void mqttSend() {
   delay(100);
   client.publish("wetter/battery_voltage2", String(volt,2));
   delay(100);
+  client.loop();  
 }
 
 void mqttDisconnect() {
