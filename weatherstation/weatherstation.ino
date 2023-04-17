@@ -44,8 +44,8 @@ float pres = NAN;
 float pressureSealevel = NAN;
 float dewPoint = NAN;
 
-BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
-BME280::PresUnit presUnit(BME280::PresUnit_hPa);
+BME280::TempUnit tempUnit = BME280::TempUnit_Celsius;
+BME280::PresUnit presUnit = BME280::PresUnit_hPa;
 EnvironmentCalculations::AltitudeUnit envAltUnit  =  EnvironmentCalculations::AltitudeUnit_Meters;
 EnvironmentCalculations::TempUnit     envTempUnit =  EnvironmentCalculations::TempUnit_Celsius;
 
