@@ -38,19 +38,23 @@ BME280I2C::Settings settings(
 
 BME280I2C bme(settings);
 
-   float temp(NAN), hum(NAN), pres(NAN);
-   float pressureSealevel;
-   float dewPoint;
+float temp = NAN;
+float hum = NAN;
+float pres = NAN;
+float pressureSealevel = NAN;
+float dewPoint = NAN;
 
-   BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
-   BME280::PresUnit presUnit(BME280::PresUnit_hPa);
-   EnvironmentCalculations::AltitudeUnit envAltUnit  =  EnvironmentCalculations::AltitudeUnit_Meters;
-   EnvironmentCalculations::TempUnit     envTempUnit =  EnvironmentCalculations::TempUnit_Celsius;
+BME280::TempUnit tempUnit(BME280::TempUnit_Celsius);
+BME280::PresUnit presUnit(BME280::PresUnit_hPa);
+EnvironmentCalculations::AltitudeUnit envAltUnit  =  EnvironmentCalculations::AltitudeUnit_Meters;
+EnvironmentCalculations::TempUnit     envTempUnit =  EnvironmentCalculations::TempUnit_Celsius;
 
 
-// define some pins
+// the internal LED for debugging
 #define ledPin 2
+// the pin for the rain sensor (will interrupt)
 #define sensorPin 27
+// Analog-Digital input for the voltage measurement GPIO 36
 #define voltagePin 36
 
 
@@ -77,7 +81,7 @@ float volt;
 
 // timer settings for deepsleep
 #define uS_TO_S_FACTOR 1000000ULL  /* Conversion factor for micro seconds to seconds */
-#define TIME_TO_SLEEP  60        /* Time ESP32 will go to sleep (in seconds) */
+#define TIME_TO_SLEEP  600        /* Time ESP32 will go to sleep (in seconds) */
 
 
 
@@ -113,13 +117,12 @@ void readVoltage() {
 }
 
 void readBMEData() {
- bme.read(pres, temp, hum, tempUnit, presUnit); 
-   dewPoint = EnvironmentCalculations::DewPoint(temp, hum, envTempUnit);
-
-   /// To get correct seaLevel pressure (QNH, QFF)
-   ///    the altitude value should be independent on measured pressure.
-   /// It is necessary to use fixed altitude point e.g. the altitude of barometer read in a map
-   pressureSealevel = EnvironmentCalculations::EquivalentSeaLevelPressure(barometerAltitude, temp, pres, envAltUnit, envTempUnit);  
+  bme.read(pres, temp, hum, tempUnit, presUnit); 
+  dewPoint = EnvironmentCalculations::DewPoint(temp, hum, envTempUnit);
+  /// To get correct seaLevel pressure (QNH, QFF)
+  ///    the altitude value should be independent on measured pressure.
+  /// It is necessary to use fixed altitude point e.g. the altitude of barometer read in a map
+  pressureSealevel = EnvironmentCalculations::EquivalentSeaLevelPressure(barometerAltitude, temp, pres, envAltUnit, envTempUnit);  
 }
 
 void mqttConnect(){
