@@ -25,3 +25,6 @@ I have meausred again, and it reveals:
 * the Waveshare charger consumes ~2mA all the time
 * the AZ Delivery ESP32 board consumes 2mA in deepsleep.
 * the actual sending might be faster than 5 seconds.
+
+## Testing
+mosquitto_sub
