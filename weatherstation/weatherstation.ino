@@ -142,6 +142,13 @@ void readBMEData() {
   }
 }
 
+
+void readRain() {
+  if (!wokeUpTimer()) {
+    rain = 1;
+  }
+}
+
 bool wokeUpTimer() {
   if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_TIMER) {
     return true;
@@ -150,14 +157,7 @@ bool wokeUpTimer() {
   }
 }
 
-// this is called by the interrupt when the magnet sensor is closed.
-void IRAM_ATTR sensorEvent() {
-  bool minTimePassed = (millis() - lastRainEventMillies) > rainEventMinTimeMillies;
-  if (minTimePassed) {
-    lastRainEventMillies = millis();
-    rain++;
-  }
-}
+
 
 void mqttConnect() {
   client.begin(MQTTSERVER, net);
@@ -170,15 +170,17 @@ void mqttConnect() {
 
 void mqttSend() {
   client.publish("wetter2/temperatur2", String(temp, 1));
-  delay(100);
+  delay(50);
   client.publish("wetter2/luftfeucht2", String(hum, 1));
-  delay(100);
+  delay(50);
   client.publish("wetter2/pressure2", String(pressureSealevel, 1));
-  delay(100);
+  delay(50);
   client.publish("wetter2/battery_voltage2", String(volt, 2));
-  delay(100);
-  client.publish("wetter2/rain2", String(rain));
-  delay(100);
+  delay(50);
+  if (rain > 0) {
+    client.publish("wetter2/rain2", String(rain));
+    delay(50);
+  }
   client.loop();
 }
 
@@ -191,6 +193,7 @@ void mqttDisconnect() {
 void setup() {
   // setup the sensor for the rain detector
   pinMode(sensorPin, INPUT_PULLUP);
+  // the interrupt interferes somehow with the MQTT or Wifi. It is not working properly.
   //attachInterrupt(sensorPin, sensorEvent, FALLING);
 
   // connect the LED
@@ -198,15 +201,16 @@ void setup() {
   digitalWrite(ledPin, LOW);
   blink();
 
-  //
-  initBME();
   // now read out the sensors
-  readVoltage();
+  initBME();
   readBMEData();
+  readVoltage();
+  readRain();
 
   delay(100);
 
   // connect to Wifi and send everything to the server
+  WiFi.disconnect();
   WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE, INADDR_NONE);
   WiFi.setHostname("Weatherstation-Test");
   int cnt = 0;
@@ -230,8 +234,7 @@ void setup() {
     WiFi.disconnect();
   }
 
-  // enable wakeup reason:
-  esp_sleep_enable_ext0_wakeup(GPIO_NUM_27, 0);
+
   // goto sleep
   esp_sleep_enable_timer_wakeup(TIME_TO_SLEEP * uS_TO_S_FACTOR);
   esp_deep_sleep_start();
