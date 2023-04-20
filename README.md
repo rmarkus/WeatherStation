@@ -1,6 +1,10 @@
 # Weather Station
 esp32 based weather station, mqtt
 
+## concept
+* temp, humidity and pressure from bme280 module
+* rain sensor by a reed contact which resets the module
+
 ## Some notes on power consumption.
 
 during connect and mqtt send the esp takes around 100mA during 5 seconds.
@@ -27,4 +31,4 @@ I have meausred again, and it reveals:
 * the actual sending might be faster than 5 seconds.
 
 ## Testing
-mosquitto_sub
+mosquitto_sub -h <hostname> -t wetter2/rain2
