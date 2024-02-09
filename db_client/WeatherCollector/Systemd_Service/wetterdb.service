@@ -1,0 +1,21 @@
+# copy this file to /etc/systemd/system/ directory
+# this makes sure that the weathercollector.py is executed as a daemon.
+
+[Unit]
+Description=Wetterdaten in Mysql
+After=syslog.target
+
+[Service]
+Type=simple
+User=bill
+Group=bill
+WorkingDirectory=/home/bill/wetter_ha
+ExecStart=/home/bill/wetter_ha/weathercollector.py
+SyslogIdentifier=wetterdb
+StandardOutput=syslog
+StandardError=syslog
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
