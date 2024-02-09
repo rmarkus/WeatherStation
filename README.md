@@ -30,5 +30,9 @@ I have meausred again, and it reveals:
 * the AZ Delivery ESP32 board consumes 2mA in deepsleep.
 * the actual sending might be faster than 5 seconds.
 
+During the winter months it showed that sun the battery was not charged envough. I made two modifications:
+* changed the board to a board with low power consumption in deepsleep.
+* removed all leds from the Waveshare battery charger board (there were 5 leds on all time)
+
 ## Testing
 mosquitto_sub -h <hostname> -t wetter2/rain2
